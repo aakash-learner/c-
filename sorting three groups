@@ -1,0 +1,28 @@
+#include <stdlib.h>
+
+int minimumOperations(int* nums, int numsSize) {
+    
+    int dp[4] = {0}; 
+    
+    for (int i = 0; i < numsSize; i++) {
+        int val = nums[i];
+        
+        if (val == 1) {
+            dp[1] = dp[1] + 1;
+        } else if (val == 2) {
+        
+            int max_prev = (dp[1] > dp[2]) ? dp[1] : dp[2];
+            dp[2] = max_prev + 1;
+        } else if (val == 3) {
+           
+            int max_prev = dp[1];
+            if (dp[2] > max_prev) max_prev = dp[2];
+            if (dp[3] > max_prev) max_prev = dp[3];
+            dp[3] = max_prev + 1;
+        }
+    }
+    int max_lnds = dp[1];
+    if (dp[2] > max_lnds) max_lnds = dp[2];
+    if (dp[3] > max_lnds) max_lnds = dp[3];
+    return numsSize - max_lnds;
+}
