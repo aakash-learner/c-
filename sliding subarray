@@ -1,0 +1,47 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* getSubarrayBeauty(int* nums, int numsSize, int k, int x, int* returnSize) {
+    int resSize = numsSize - k + 1;
+    int* result = (int*)malloc(resSize * sizeof(int));
+    *returnSize = resSize;
+
+    // Frequency array for negative numbers [-50, -1] mapped to indices [0, 49]
+    int freq[51] = {0}; 
+    int resIndex = 0;
+
+    for (int i = 0; i < numsSize; i++) {
+        // 1. Add current element to the window if it's negative
+        if (nums[i] < 0) {
+            freq[nums[i] + 50]++;
+        }
+
+        // 2. Remove the element sliding out of the window
+        if (i >= k) {
+            int outbound = nums[i - k];
+            if (outbound < 0) {
+                freq[outbound + 50]--;
+            }
+        }
+
+        // 3. Once window reaches size k, find the x-th smallest negative integer
+        if (i >= k - 1) {
+            int count = 0;
+            int beauty = 0; // Default to 0 if there are fewer than x negatives
+
+            for (int j = 0; j < 50; j++) {
+                count += freq[j];
+                if (count >= x) {
+                    beauty = j - 50; // Map index back to negative value
+                    break;
+                }
+            }
+            result[resIndex++] = beauty;
+        }
+    }
+
+    return result;
+}
