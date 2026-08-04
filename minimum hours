@@ -1,0 +1,27 @@
+int minNumberOfHours(int initialEnergy, int initialExperience, int* energy, int energySize, int* experience, int experienceSize) {
+    int trainingHours = 0;
+    
+    // 1. Calculate required energy
+    int totalEnergyNeeded = 0;
+    for (int i = 0; i < energySize; i++) {
+        totalEnergyNeeded += energy[i];
+    }
+    
+    // You need strictly more energy than the total energy consumed
+    if (initialEnergy <= totalEnergyNeeded) {
+        trainingHours += (totalEnergyNeeded + 1) - initialEnergy;
+    }
+    
+    // 2. Calculate required experience sequentially
+    int currentExperience = initialExperience;
+    for (int i = 0; i < experienceSize; i++) {
+        if (currentExperience <= experience[i]) {
+            int extraNeeded = experience[i] - currentExperience + 1;
+            trainingHours += extraNeeded;
+            currentExperience += extraNeeded; // Train before fighting
+        }
+        currentExperience += experience[i]; // Gain experience after winning
+    }
+    
+    return trainingHours;
+}
