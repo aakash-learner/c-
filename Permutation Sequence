@@ -1,0 +1,45 @@
+#include <stdlib.h>
+
+char* getPermutation(int n, int k) {
+    // Array to store factorials up to (n-1)!
+    int factorials[10];
+    factorials[0] = 1;
+    for (int i = 1; i < n; i++) {
+        factorials[i] = factorials[i - 1] * i;
+    }
+
+    // Initialize list of available digits 1 through n
+    int digits[9];
+    for (int i = 0; i < n; i++) {
+        digits[i] = i + 1;
+    }
+
+    // Allocate memory for the output string: n characters + 1 null terminator
+    char* result = (char*)malloc((n + 1) * sizeof(char));
+    result[n] = '\0';
+
+    // Convert k to 0-based indexing for math simplicity
+    k--; 
+
+    // Find the correct digit for each position of the answer string
+    for (int i = 0; i < n; i++) {
+        // Number of permutations possible for the remaining (n - 1 - i) positions
+        int blockSize = factorials[n - 1 - i];
+        
+        // Find the index of the next digit to choose from the available pool
+        int digitIdx = k / blockSize;
+        
+        // Append it to the result string (convert integer digit to char)
+        result[i] = digits[digitIdx] + '0';
+        
+        // Update k to look inside the chosen block
+        k %= blockSize;
+
+        // Shift remaining digits left to remove the used digit from the pool
+        for (int j = digitIdx; j < n - 1 - i; j++) {
+            digits[j] = digits[j + 1];
+        }
+    }
+
+    return result;
+}
