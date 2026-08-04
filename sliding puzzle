@@ -1,0 +1,99 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+#define MAX_STATES 721
+#define VISITED_SIZE 654322 // Max possible configuration as integer is 543210
+
+// Define the structure for the BFS queue
+typedef struct {
+    char state[7];
+    int moves;
+} QueueNode;
+
+// Predefined 1D adjacency list for 2x3 board
+const int neighbors[6][4] = {
+    {1, 3, -1, -1}, // Index 0
+    {0, 2, 4, -1},  // Index 1
+    {1, 5, -1, -1}, // Index 2
+    {0, 4, -1, -1}, // Index 3
+    {1, 3, 5, -1},  // Index 4
+    {2, 4, -1, -1}  // Index 5
+};
+
+// Helper function to swap characters
+void swap(char *x, char *y) {
+    char temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
+int slidingPuzzle(int** board, int boardSize, int* boardColSize) {
+    char start[7];
+    char target[] = "123450";
+    
+    // Flatten 2D board into a 1D string
+    int idx = 0;
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 3; j++) {
+            start[idx++] = board[i][j] + '0';
+        }
+    }
+    start[6] = '\0';
+
+    // If already solved, return 0
+    if (strcmp(start, target) == 0) return 0;
+
+    // Fast look-up array for visited states
+    bool *visited = (bool *)calloc(VISITED_SIZE, sizeof(bool));
+    visited[atoi(start)] = true;
+
+    // Initialize BFS Queue
+    QueueNode *queue = (QueueNode *)malloc(MAX_STATES * sizeof(QueueNode));
+    int head = 0, tail = 0;
+
+    // Enqueue initial state
+    strcpy(queue[tail].state, start);
+    queue[tail].moves = 0;
+    tail++;
+
+    while (head < tail) {
+        QueueNode curr = queue[head++];
+        
+        // Target state found
+        if (strcmp(curr.state, target) == 0) {
+            free(visited);
+            free(queue);
+            return curr.moves;
+        }
+
+        // Find the index of empty square '0'
+        int zeroIdx = 0;
+        while (curr.state[zeroIdx] != '0') zeroIdx++;
+
+        // Explore all possible adjacent swaps
+        for (int i = 0; i < 4; i++) {
+            int nextIdx = neighbors[zeroIdx][i];
+            if (nextIdx == -1) break; // No more valid moves
+
+            // Generate next state configuration
+            char nextState[7];
+            strcpy(nextState, curr.state);
+            swap(&nextState[zeroIdx], &nextState[nextIdx]);
+
+            int stateVal = atoi(nextState);
+            if (!visited[stateVal]) {
+                visited[stateVal] = true;
+                strcpy(queue[tail].state, nextState);
+                queue[tail].moves = curr.moves + 1;
+                tail++;
+            }
+        }
+    }
+
+    // Clean up memory
+    free(visited);
+    free(queue);
+    return -1;
+}
