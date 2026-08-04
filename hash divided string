@@ -1,0 +1,31 @@
+#include <stdlib.h>
+#include <string.h>
+
+char* stringHash(char* s, int k) {
+    int n = strlen(s);
+    int num_substrings = n / k;
+    
+    // Allocate space for the result string (num_substrings characters + '\0')
+    char* result = (char*)malloc((num_substrings + 1) * sizeof(char));
+    
+    int result_idx = 0;
+    
+    // Loop through s in blocks of size k
+    for (int i = 0; i < n; i += k) {
+        int sum = 0;
+        
+        // Sum up alphabetical hash values for characters in the current substring
+        for (int j = 0; j < k; j++) {
+            sum += s[i + j] - 'a';
+        }
+        
+        // Calculate the remainder and convert it back to a character
+        int hashedChar = sum % 26;
+        result[result_idx++] = (char)(hashedChar + 'a');
+    }
+    
+    // Null-terminate the string safely
+    result[result_idx] = '\0';
+    
+    return result;
+}
