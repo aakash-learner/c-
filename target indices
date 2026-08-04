@@ -1,0 +1,22 @@
+#include <stdlib.h>
+int* targetIndices(int* nums, int numsSize, int target, int* returnSize) {
+    int count_smaller = 0;
+    int count_target = 0;
+    for (int i = 0; i < numsSize; i++) {
+        if (nums[i] < target) {
+            count_smaller++;
+        } else if (nums[i] == target) {
+            count_target++;
+        }
+    }
+    *returnSize = count_target;
+    if (count_target == 0) {
+        return NULL;
+    }
+    int* result = (int*)malloc(count_target * sizeof(int));
+    for (int i = 0; i < count_target; i++) {
+        result[i] = count_smaller + i;
+    }
+    
+    return result;
+}
