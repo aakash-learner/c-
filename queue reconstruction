@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Custom comparator function for sorting the people array
+int compare_people(const void* a, const void* b) {
+    int* person1 = *(int**)a;
+    int* person2 = *(int**)b;
+    
+    // Condition 1: If heights are different, sort by height in descending order
+    if (person1[0] != person2[0]) {
+        return person2[0] - person1[0];
+    }
+    // Condition 2: If heights are equal, sort by k-value in ascending order
+    return person1[1] - person2[1];
+}
+
+/**
+ * Return an array of arrays of size *returnSize.
+ * The sizes of the arrays are returned as *returnColumnSizes array.
+ * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().
+ */
+int** reconstructQueue(int** people, int peopleSize, int* peopleColSize, int* returnSize, int** returnColumnSizes) {
+    // 1. Sort the input array using our custom comparator
+    qsort(people, peopleSize, sizeof(int*), compare_people);
+    
+    // 2. Allocate memory for the final reconstructed queue
+    int** queue = (int**)malloc(peopleSize * sizeof(int*));
+    *returnColumnSizes = (int*)malloc(peopleSize * sizeof(int));
+    *returnSize = peopleSize;
+    
+    // Initialize tracking count of elements currently inside the queue
+    int current_size = 0;
+    
+    // 3. Insert each person into the queue at the index specified by their k-value
+    for (int i = 0; i < peopleSize; i++) {
+        int target_idx = people[i][1];
+        
+        // Allocate memory for the individual person entry in the output queue
+        queue[current_size] = (int*)malloc(2 * sizeof(int));
+        queue[current_size][0] = people[i][0];
+        queue[current_size][1] = people[i][1];
+        (*returnColumnSizes)[current_size] = 2;
+        
+        // Temporarily hold the newly allocated row pointer
+        int* current_person = queue[current_size];
+        
+        // Shift elements to the right to make space at the target_idx position
+        for (int j = current_size; j > target_idx; j--) {
+            queue[j] = queue[j - 1];
+        }
+        
+        // Place the person at their designated k-index position
+        queue[target_idx] = current_person;
+        current_size++;
+    }
+    
+    return queue;
+}
