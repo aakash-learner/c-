@@ -1,0 +1,58 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+
+bool isSafe(int row, int col, int* queens, int n) {
+    for (int i = 0; i < row; i++) {
+        int qCol = queens[i];
+        if (qCol == col || abs(qCol - col) == (row - i)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void backtrack(int row, int n, int* queens, char**** results, int* count, int* capacity) {
+    if (row == n) {
+        if (*count >= *capacity) {
+            *capacity *= 2;
+            *results = (char***)realloc(*results, (*capacity) * sizeof(char**));
+        }
+        
+        char** board = (char**)malloc(n * sizeof(char*));
+        for (int i = 0; i < n; i++) {
+            board[i] = (char*)malloc((n + 1) * sizeof(char));
+            memset(board[i], '.', n);
+            board[i][queens[i]] = 'Q';
+            board[i][n] = '\0';
+        }
+        (*results)[*count] = board;
+        (*count)++;
+        return;
+    }
+
+    for (int col = 0; col < n; col++) {
+        if (isSafe(row, col, queens, n)) {
+            queens[row] = col;
+            backtrack(row + 1, n, queens, results, count, capacity);
+        }
+    }
+}
+
+char*** solveNQueens(int n, int* returnSize, int** returnColumnSizes) {
+    int capacity = 10;
+    char*** results = (char***)malloc(capacity * sizeof(char**));
+    int count = 0;
+    int* queens = (int*)malloc(n * sizeof(int));
+
+    backtrack(0, n, queens, &results, &count, &capacity);
+
+    *returnSize = count;
+    *returnColumnSizes = (int*)malloc(count * sizeof(int));
+    for (int i = 0; i < count; i++) {
+        (*returnColumnSizes)[i] = n;
+    }
+
+    free(queens);
+    return results;
+}
