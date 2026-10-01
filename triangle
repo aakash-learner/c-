@@ -1,0 +1,15 @@
+#include <math.h>
+int minimumTotal(int** triangle, int triangleSize, int* triangleColSize) {
+    for (int i = triangleSize - 2; i >= 0; i--) {
+        for (int j = 0; j <= i; j++) {
+            int nextRowLeft = triangle[i + 1][j];
+            int nextRowRight = triangle[i + 1][j + 1];
+            if (nextRowLeft < nextRowRight) {
+                triangle[i][j] += nextRowLeft;
+            } else {
+                triangle[i][j] += nextRowRight;
+            }
+        }
+    }
+    return triangle[0][0];
+}
