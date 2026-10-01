@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+struct HashEntry {
+int count_key[26];
+char** words;
+int count;
+int capacity;
+struct HashEntry* next;
+};
+unsigned int hashFunction(int* count_key, int tableSize) {
+unsigned int hash = 5381;
+for (int i = 0; i < 26; i++) {
+hash = ((hash << 5) + hash) + count_key[i];
+}
+return hash % tableSize;
+}
+int matchesKey(int* key1, int* key2) {
+for (int i = 0; i < 26; i++) {
+if (key1[i] != key2[i]) return 0;
+}
+return 1;
+}
+char*** groupAnagrams(char** strs, int strsSize, int* returnSize, int** returnColumnSizes) {
+if (strsSize == 0) {
+*returnSize = 0;
+*returnColumnSizes = NULL;
+return NULL;
+}
+int tableSize = strsSize * 2;
+struct HashEntry** hashTable = calloc(tableSize, sizeof(struct HashEntry*));
+int uniqueGroupsCount = 0;
+for (int i = 0; i < strsSize; i++) {
+int current_count[26] = {0};
+int len = strlen(strs[i]);
+for (int j = 0; j < len; j++) {
+current_count[strs[i][j] - 'a']++;
+}
+unsigned int index = hashFunction(current_count, tableSize);
+struct HashEntry* curr = hashTable[index];
+struct HashEntry* found = NULL;
+while (curr != NULL) {
+if (matchesKey(curr->count_key, current_count)) {
+found = curr;
+break;
+}
+curr = curr->next;
+}
+if (found != NULL) {
+if (found->count >= found->capacity) {
+found->capacity = 2;
+found->words = realloc(found->words, found->capacity * sizeof(char));
+}
+found->words[found->count] = strs[i];
+found->count++;
+} else {
+struct HashEntry* newEntry = malloc(sizeof(struct HashEntry));
+memcpy(newEntry->count_key, current_count, 26 * sizeof(int));
+newEntry->capacity = 4;
+newEntry->words = malloc(newEntry->capacity * sizeof(char*));
+newEntry->words[0] = strs[i];
+newEntry->count = 1;
+newEntry->next = hashTable[index];
+hashTable[index] = newEntry;
+uniqueGroupsCount++;
+}
+}
+char*** result = malloc(uniqueGroupsCount * sizeof(char**));
+*returnColumnSizes = malloc(uniqueGroupsCount * sizeof(int));
+*returnSize = uniqueGroupsCount;
+int groupIdx = 0;
+for (int i = 0; i < tableSize; i++) {
+struct HashEntry* curr = hashTable[i];
+while (curr != NULL) {
+result[groupIdx] = malloc(curr->count * sizeof(char*));
+(*returnColumnSizes)[groupIdx] = curr->count;
+for (int j = 0; j < curr->count; j++) {
+result[groupIdx][j] = curr->words[j];
+}
+struct HashEntry* temp = curr;
+curr = curr->next;
+free(temp->words);
+free(temp);
+groupIdx++;
+}
+}
+free(hashTable);
+return result;
+}
