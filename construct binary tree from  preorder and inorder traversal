@@ -1,0 +1,36 @@
+#include <stdlib.h>
+#include <stdio.h>
+
+int findIndex(int* arr, int start, int end, int value) {
+    for (int i = start; i <= end; i++) {
+        if (arr[i] == value) {
+            return i;
+        }
+    }
+    return -1;
+}
+struct TreeNode* buildTreeHelper(int* preorder, int* inorder, int inStart, int inEnd, int* preIndex) {
+    if (inStart > inEnd) {
+        return NULL;
+    }
+    int rootVal = preorder[*preIndex];
+    (*preIndex)++;
+
+    struct TreeNode* root = (struct TreeNode*)malloc(sizeof(struct TreeNode));
+    root->val = rootVal;
+    root->left = NULL;
+    root->right = NULL;
+    if (inStart == inEnd) {
+        return root;
+    }
+    int inIndex = findIndex(inorder, inStart, inEnd, rootVal);
+    root->left = buildTreeHelper(preorder, inorder, inStart, inIndex - 1, preIndex);
+    root->right = buildTreeHelper(preorder, inorder, inIndex + 1, inEnd, preIndex);
+
+    return root;
+}
+
+struct TreeNode* buildTree(int* preorder, int preorderSize, int* inorder, int inorderSize) {
+    int preIndex = 0;
+    return buildTreeHelper(preorder, inorder, 0, inorderSize - 1, &preIndex);
+}
